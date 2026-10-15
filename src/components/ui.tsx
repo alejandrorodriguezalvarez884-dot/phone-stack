@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } fro
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors } from '../theme';
+import { colors, maxScale } from '../theme';
 
 export const tap = () => Haptics.selectionAsync().catch(() => {});
 
@@ -42,7 +42,7 @@ export function Button({ label, onPress, variant = 'primary', disabled, style }:
           style={[StyleSheet.absoluteFill, styles.gradient]}
         />
       )}
-      <Text style={[styles.label, !primary && styles.secondaryLabel]}>{label}</Text>
+      <Text maxFontSizeMultiplier={maxScale.control} style={[styles.label, !primary && styles.secondaryLabel]}>{label}</Text>
     </Pressable>
   );
 }

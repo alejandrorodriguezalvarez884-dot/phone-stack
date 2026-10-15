@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { BackHandler, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { t } from '../i18n';
 import type { Player } from '../room';
-import { colors } from '../theme';
+import { colors, maxScale } from '../theme';
 import { useGame, type Identity } from '../useGame';
 import { useSounds } from '../useSounds';
 import { Button, Card, tap } from './ui';
@@ -25,6 +26,7 @@ const ALARM_MAX_MS = 10_000;
 const KEEP_AWAKE_TAG = 'phone-stack-room';
 
 export function RoomScreen({ code, practice, create, identity, onLeave }: Props) {
+  const insets = useSafeAreaInsets();
   // Screen stays on at the table, otherwise the phone sleeps face down and stops reading the sensor.
   useEffect(() => {
     activateKeepAwakeAsync(KEEP_AWAKE_TAG).catch(() => {});
@@ -62,18 +64,18 @@ export function RoomScreen({ code, practice, create, identity, onLeave }: Props)
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 32 + insets.bottom }]}>
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <Text style={styles.headerLabel}>{practice ? t.practiceTitle : t.table}</Text>
-          {!practice && <Text style={styles.code}>{code}</Text>}
+          <Text maxFontSizeMultiplier={maxScale.heading} style={styles.headerLabel}>{practice ? t.practiceTitle : t.table}</Text>
+          {!practice && <Text maxFontSizeMultiplier={maxScale.display} style={styles.code}>{code}</Text>}
         </View>
         {!practice && <HeaderButton label={t.share} onPress={share} />}
         <HeaderButton label={t.leave} onPress={onLeave} />
       </View>
 
       {game.status !== 'connected' && (
-        <Text style={[styles.status, game.status === 'error' && styles.error]}>
+        <Text maxFontSizeMultiplier={maxScale.body} style={[styles.status, game.status === 'error' && styles.error]}>
           {game.status === 'error' ? t.connectionError : t.connecting}
         </Text>
       )}
@@ -88,7 +90,7 @@ export function RoomScreen({ code, practice, create, identity, onLeave }: Props)
 
       {sensor.available === false && (state.phase === 'placing' || state.phase === 'armed') && (
         <Card style={styles.simulate}>
-          <Text style={styles.muted}>{t.sensorMissing}</Text>
+          <Text maxFontSizeMultiplier={maxScale.body} style={styles.muted}>{t.sensorMissing}</Text>
           {state.phase === 'placing' ? (
             <Button label={t.simulateDown} variant="secondary" onPress={sensor.simulateDown} />
           ) : (
@@ -133,14 +135,14 @@ function Stage({
     return (
       <View style={styles.result}>
         <LinearGradient colors={[colors.accent, colors.accentDark]} style={StyleSheet.absoluteFill} />
-        <Text style={styles.resultLabel}>{isMe ? t.youLose : state.phase === 'result' ? t.loserTitle : t.liftedTitle}</Text>
-        <Text style={styles.loser} numberOfLines={2} adjustsFontSizeToFit>
+        <Text maxFontSizeMultiplier={maxScale.heading} style={styles.resultLabel}>{isMe ? t.youLose : state.phase === 'result' ? t.loserTitle : t.liftedTitle}</Text>
+        <Text maxFontSizeMultiplier={maxScale.display} style={styles.loser} numberOfLines={2} adjustsFontSizeToFit>
           {loserName}
         </Text>
         {state.phase === 'result' && state.penalty !== undefined && (
           <View style={styles.penalty}>
-            <Text style={styles.penaltyLabel}>{t.penaltyTitle}</Text>
-            <Text style={styles.penaltyText}>{t.penalties[state.penalty]}</Text>
+            <Text maxFontSizeMultiplier={maxScale.heading} style={styles.penaltyLabel}>{t.penaltyTitle}</Text>
+            <Text maxFontSizeMultiplier={maxScale.body} style={styles.penaltyText}>{t.penalties[state.penalty]}</Text>
           </View>
         )}
         <View style={styles.resultActions}>
@@ -149,7 +151,7 @@ function Stage({
             (game.isHost ? (
               <Button label={t.nextRound} variant="secondary" onPress={game.startRound} />
             ) : (
-              <Text style={styles.resultWaiting}>{t.waitingHost}</Text>
+              <Text maxFontSizeMultiplier={maxScale.body} style={styles.resultWaiting}>{t.waitingHost}</Text>
             ))}
         </View>
       </View>
@@ -159,8 +161,8 @@ function Stage({
   if (state.phase === 'armed') {
     return (
       <Card style={styles.stage}>
-        <Text style={styles.stageTitle}>{t.armedTitle}</Text>
-        <Text style={styles.muted}>{t.armedHint}</Text>
+        <Text maxFontSizeMultiplier={maxScale.heading} style={styles.stageTitle}>{t.armedTitle}</Text>
+        <Text maxFontSizeMultiplier={maxScale.body} style={styles.muted}>{t.armedHint}</Text>
       </Card>
     );
   }
@@ -170,20 +172,20 @@ function Stage({
     return (
       <Card style={styles.stage}>
         <PhoneGlyph down={game.sensor.faceDown} />
-        <Text style={styles.stageTitle}>{t.placeTitle}</Text>
-        <Text style={styles.muted}>{practice ? t.practiceHint : t.placeHint}</Text>
-        {!practice && missing.length > 0 && <Text style={styles.missing}>{t.waitingFor(missing.join(', '))}</Text>}
+        <Text maxFontSizeMultiplier={maxScale.heading} style={styles.stageTitle}>{t.placeTitle}</Text>
+        <Text maxFontSizeMultiplier={maxScale.body} style={styles.muted}>{practice ? t.practiceHint : t.placeHint}</Text>
+        {!practice && missing.length > 0 && <Text maxFontSizeMultiplier={maxScale.body} style={styles.missing}>{t.waitingFor(missing.join(', '))}</Text>}
       </Card>
     );
   }
 
   return (
     <Card style={styles.stage}>
-      <Text style={styles.muted}>{game.isHost ? (practice ? t.practiceHint : t.lobbyHost) : t.lobbyGuest}</Text>
+      <Text maxFontSizeMultiplier={maxScale.body} style={styles.muted}>{game.isHost ? (practice ? t.practiceHint : t.lobbyHost) : t.lobbyGuest}</Text>
       {game.isHost && (
         <>
           <Button label={t.startRound} disabled={!game.canStart} onPress={game.startRound} />
-          {!game.canStart && <Text style={styles.missing}>{t.needPlayers}</Text>}
+          {!game.canStart && <Text maxFontSizeMultiplier={maxScale.body} style={styles.missing}>{t.needPlayers}</Text>}
         </>
       )}
     </Card>
@@ -214,21 +216,21 @@ function PlayerList({
   const anyLosses = Object.keys(tally).length > 0;
   return (
     <Card>
-      <Text style={styles.listTitle}>{anyLosses ? t.scoreboard : t.players}</Text>
+      <Text maxFontSizeMultiplier={maxScale.heading} style={styles.listTitle}>{anyLosses ? t.scoreboard : t.players}</Text>
       {players.map((p) => {
         const tags = [p.id === meId && t.you, p.id === hostId && t.host].filter(Boolean).join(' · ');
         const losses = tally[p.id] ?? 0;
         return (
           <View key={p.id} style={styles.player}>
             {showReady && <View style={[styles.dot, p.ready && styles.dotReady]} />}
-            <Text style={styles.playerName} numberOfLines={1}>
+            <Text maxFontSizeMultiplier={maxScale.heading} style={styles.playerName} numberOfLines={1}>
               {p.name}
               {tags ? <Text style={styles.playerTags}>{`  ${tags}`}</Text> : null}
             </Text>
             {showReady ? (
-              <Text style={[styles.playerMeta, p.ready && styles.ready]}>{p.ready ? t.ready : t.notReady}</Text>
+              <Text maxFontSizeMultiplier={maxScale.heading} style={[styles.playerMeta, p.ready && styles.ready]}>{p.ready ? t.ready : t.notReady}</Text>
             ) : (
-              losses > 0 && <Text style={styles.playerMeta}>{t.losses(losses)}</Text>
+              losses > 0 && <Text maxFontSizeMultiplier={maxScale.heading} style={styles.playerMeta}>{t.losses(losses)}</Text>
             )}
           </View>
         );
@@ -244,7 +246,7 @@ function HeaderButton({ label, onPress }: { label: string; onPress: () => void }
       accessibilityRole="button"
       style={({ pressed }) => [styles.headerButton, pressed && { opacity: 0.7 }]}
     >
-      <Text style={styles.headerButtonLabel}>{label}</Text>
+      <Text maxFontSizeMultiplier={maxScale.control} style={styles.headerButtonLabel}>{label}</Text>
     </Pressable>
   );
 }
@@ -253,16 +255,17 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 32,
     gap: 16,
   },
   header: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: 8,
   },
   headerText: {
-    flex: 1,
+    flexGrow: 1,
+    minWidth: 150,
   },
   headerLabel: {
     color: colors.textMuted,

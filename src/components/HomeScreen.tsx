@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { hasBackend } from '../config';
 import { t } from '../i18n';
 import { CODE_LENGTH, normalizeCode, randomCode } from '../room';
-import { colors } from '../theme';
+import { colors, maxScale } from '../theme';
 import { Button, Card, Logo } from './ui';
 
 type Props = {
@@ -15,28 +16,37 @@ type Props = {
 const MAX_NAME = 20;
 
 export function HomeScreen({ initialName, onEnter }: Props) {
+  const insets = useSafeAreaInsets();
   const [name, setName] = useState(initialName);
   const [code, setCode] = useState('');
   const trimmed = name.trim();
   const canPlay = trimmed.length > 0;
+  const canJoin = canPlay && code.length === CODE_LENGTH;
+  const join = () => {
+    if (canJoin) onEnter({ code, practice: false, create: false, name: trimmed });
+  };
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: 32 + insets.bottom }]}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.hero}>
           <Logo size={88} />
-          <Text style={styles.title}>{t.appName}</Text>
-          <Text style={styles.tagline}>{t.tagline}</Text>
+          <Text maxFontSizeMultiplier={maxScale.display} style={styles.title}>{t.appName}</Text>
+          <Text maxFontSizeMultiplier={maxScale.heading} style={styles.tagline}>{t.tagline}</Text>
         </View>
 
         <Card style={styles.form}>
-          <Text style={styles.label}>{t.yourName}</Text>
+          <Text maxFontSizeMultiplier={maxScale.heading} style={styles.label}>{t.yourName}</Text>
           <TextInput
             value={name}
             onChangeText={(v) => setName(v.slice(0, MAX_NAME))}
             placeholder={t.namePlaceholder}
             placeholderTextColor={colors.textFaint}
             style={styles.input}
+            maxFontSizeMultiplier={maxScale.heading}
             autoCapitalize="words"
             autoCorrect={false}
             returnKeyType="done"
@@ -56,21 +66,24 @@ export function HomeScreen({ initialName, onEnter }: Props) {
                   placeholder={t.codePlaceholder}
                   placeholderTextColor={colors.textFaint}
                   style={[styles.input, styles.codeInput]}
+                  maxFontSizeMultiplier={maxScale.display}
                   autoCapitalize="characters"
                   autoCorrect={false}
                   maxLength={CODE_LENGTH}
+                  returnKeyType="join"
+                  onSubmitEditing={join}
                 />
                 <Button
                   label={t.joinTable}
                   variant="secondary"
-                  disabled={!canPlay || code.length !== CODE_LENGTH}
-                  onPress={() => onEnter({ code, practice: false, create: false, name: trimmed })}
+                  disabled={!canJoin}
+                  onPress={join}
                   style={styles.joinButton}
                 />
               </View>
             </>
           ) : (
-            <Text style={styles.note}>{t.noBackend}</Text>
+            <Text maxFontSizeMultiplier={maxScale.body} style={styles.note}>{t.noBackend}</Text>
           )}
 
           <Button
@@ -82,11 +95,11 @@ export function HomeScreen({ initialName, onEnter }: Props) {
         </Card>
 
         <Card>
-          <Text style={styles.howTitle}>{t.howTitle}</Text>
+          <Text maxFontSizeMultiplier={maxScale.heading} style={styles.howTitle}>{t.howTitle}</Text>
           {t.howSteps.map((step, i) => (
             <View key={step} style={styles.step}>
-              <Text style={styles.stepNumber}>{i + 1}</Text>
-              <Text style={styles.stepText}>{step}</Text>
+              <Text maxFontSizeMultiplier={1} style={styles.stepNumber}>{i + 1}</Text>
+              <Text maxFontSizeMultiplier={maxScale.body} style={styles.stepText}>{step}</Text>
             </View>
           ))}
         </Card>
@@ -102,7 +115,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 24,
-    paddingBottom: 32,
     gap: 20,
   },
   hero: {
