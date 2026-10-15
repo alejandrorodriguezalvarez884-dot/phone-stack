@@ -53,35 +53,24 @@ Las capturas se sacaron del simulador iPhone 17 (6,3") con cuatro jugadores cone
 - **1.2 Contenido de usuarios:** solo nombres visibles dentro de una mesa privada. Si Apple lo pidiera, habría que añadir una forma de expulsar a un jugador.
 - **iPad:** `supportsTablet` es `false`; en iPad se ejecuta en modo compatibilidad de iPhone, que Apple acepta.
 
-## Lo que queda (necesita tu cuenta)
+## Estado de la publicación (15/10/2026)
 
-1. **Apple Developer Program** activo (99 €/año) con el Apple ID con el que vas a publicar.
-2. **GitHub Pages:** en GitHub → *Settings → Pages*, publica la rama `main`, carpeta `/docs` (después de fusionar el PR). Comprueba que abre `https://alejandrorodriguezalvarez884-dot.github.io/phone-stack/privacy.html`.
-3. **Probar en un iPhone real** el signo del eje Z y los umbrales del sensor (ver README → "Pendiente de probar en dispositivos reales"). El simulador no tiene acelerómetro.
-4. **Compilar, firmar y subir.** Dos caminos:
+Hecho:
 
-   **A. EAS (recomendado, en la nube):**
+- App creada en App Store Connect (id 6823333935, bundle `com.alejandrorodriguez.phonestack`, equipo J44H9U6HLW) con la ficha en inglés y español, capturas, privacidad, clasificación por edades, precio gratis y disponibilidad en 175 países (no en Mac ni Vision Pro).
+- Build 1.0.0 (1) subida desde este Mac.
+- GitHub Pages publica `docs/` desde la rama `app-store-release`. **Al fusionar el PR**, cámbialo a `main` en *Settings → Pages* (o con `gh api -X PUT repos/alejandrorodriguezalvarez884-dot/phone-stack/pages -f "source[branch]=main" -f "source[path]=/docs"`).
 
-   ```bash
-   npx eas-cli@latest login
-   npx eas-cli@latest build -p ios --profile production
-   npx eas-cli@latest submit -p ios --latest
-   ```
+Pendiente:
 
-   EAS te pedirá iniciar sesión con tu Apple ID, crea el identificador, el certificado de distribución y el perfil de aprovisionamiento, y la primera vez también la app en App Store Connect.
+- **Probar en un iPhone real** el signo del eje Z y los umbrales del sensor (ver README → "Pendiente de probar en dispositivos reales"). El simulador no tiene acelerómetro.
 
-   **B. Xcode en este Mac:**
+## Cómo se firmó y subió (para la próxima versión)
 
-   ```bash
-   npx expo prebuild -p ios --clean
-   open ios/PhoneStack.xcworkspace
-   ```
+1. Sube `version` en `app.json` (y `ios.buildNumber` si no usas EAS).
+2. `npx expo prebuild -p ios --clean` y `xcodebuild -workspace ios/PhoneStack.xcworkspace -scheme PhoneStack -configuration Release -destination generic/platform=iOS -archivePath ios/build/PhoneStack.xcarchive CODE_SIGNING_ALLOWED=NO archive`.
+3. Exporta y sube con `xcodebuild -exportArchive` y firma manual: certificado "Apple Distribution: Alejandro Rodriguez" y perfil "Phone Stack App Store", ambos creados con la API de App Store Connect. La clave de la API es `~/.appstoreconnect/private_keys/AuthKey_HXJ4689RD6.p8` (rol App Manager, Issuer ID `a389ee17-16d7-409a-96e7-f8a30c5a484c`). El certificado y su clave privada están en `~/.appstoreconnect/signing/` y en el llavero `phonestack-signing`. Con App Manager la firma automática "en la nube" de Xcode no funciona; por eso se firma a mano.
 
-   En Xcode: *Settings → Accounts* añade tu Apple ID; en el target *PhoneStack → Signing & Capabilities* elige tu equipo; luego *Product → Archive* y *Distribute App → App Store Connect*. Antes crea la app en [App Store Connect](https://appstoreconnect.apple.com) (*Apps → +*) con el bundle id `com.alejandrorodriguez.phonestack`.
+Alternativa sin nada de lo anterior: EAS (`npx eas-cli@latest build -p ios --profile production` y `npx eas-cli@latest submit -p ios --latest`), que inicia sesión con tu Apple ID y gestiona sus propios certificados.
 
-   CocoaPods: en este Mac no hay Homebrew y el Ruby del sistema es demasiado antiguo; se usó el Ruby portátil de Homebrew (`portable-ruby` 3.4.5) con `gem install cocoapods`.
-
-5. **Rellenar la ficha** en App Store Connect: copia los textos de `fastlane/metadata/` y sube las capturas de `fastlane/screenshots/` (o usa `fastlane deliver` con esas carpetas), responde *App Privacy* y la clasificación por edades como arriba, y precio gratis.
-6. **Enviar a revisión** desde App Store Connect, eligiendo el build subido.
-
-Para versiones siguientes: sube `version` en `app.json`; EAS incrementa el build solo (`autoIncrement`).
+CocoaPods: en este Mac no hay Homebrew y el Ruby del sistema es demasiado antiguo; se usó el Ruby portátil de Homebrew (`portable-ruby` 3.4.5) con `gem install cocoapods`.
