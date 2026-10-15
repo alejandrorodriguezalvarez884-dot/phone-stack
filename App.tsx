@@ -26,7 +26,8 @@ export default function App() {
     <SafeAreaProvider>
       <StatusBar style="light" />
       <LinearGradient colors={[colors.backgroundTop, colors.backgroundBottom]} style={StyleSheet.absoluteFill} />
-      <SafeAreaView style={styles.safe}>
+      {/* The screens scroll under the home indicator and pad for it themselves. */}
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
         {identity &&
           (table ? (
             <RoomScreen

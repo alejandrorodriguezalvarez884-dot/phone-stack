@@ -1,0 +1,6 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "Phone Stack",
+    "NSMotionUsageDescription": "Phone Stack uses the motion sensors to notice when you pick your phone up from the table."
+  }
+}

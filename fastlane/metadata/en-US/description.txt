@@ -1,0 +1,18 @@
+Phone Stack turns the classic dinner phone-stack game into an app: everyone puts their phone face down on the table, and the first one to pick theirs up pays.
+
+HOW IT WORKS
+• One person creates a table and shares the 4-character code. Everyone else joins with it.
+• The host starts the round and everyone places their phone face down.
+• When every phone is face down and still, a short beep tells the table the round is live.
+• The moment someone picks their phone up, leaves the app or loses connection, the alarm goes off on every phone and their name appears with a random penalty.
+
+FEATURES
+• Real-time sync between all the phones at the table.
+• Uses the motion sensor to tell when a phone is face down and when it is picked up.
+• Scoreboard that keeps count of who has lost the most rounds.
+• Penalties to make it fun: pay for the coffees, give a toast, clear the table…
+• Solo practice mode to try the sensor before dinner.
+• No account, no ads, no tracking. Just type your name and play.
+• Available in English and Spanish.
+
+Less scrolling, more talking. Put your phone down and enjoy dinner.

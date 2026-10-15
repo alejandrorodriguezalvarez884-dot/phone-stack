@@ -1,0 +1,18 @@
+Phone Stack convierte en app el clásico juego de las cenas: todos ponen el móvil boca abajo sobre la mesa y el primero que lo levanta, paga.
+
+CÓMO FUNCIONA
+• Uno crea la mesa y comparte el código de 4 caracteres. Los demás se unen con él.
+• El anfitrión empieza la ronda y todos dejan el móvil boca abajo.
+• Cuando todos los móviles están boca abajo y quietos, un pitido avisa de que la ronda está en marcha.
+• En cuanto alguien levanta su móvil, sale de la app o pierde la conexión, suena la alarma en todos los móviles y aparece su nombre con un castigo al azar.
+
+CARACTERÍSTICAS
+• Sincronización en tiempo real entre todos los móviles de la mesa.
+• Usa el sensor de movimiento para saber cuándo un móvil está boca abajo y cuándo se levanta.
+• Marcador con quién ha perdido más rondas.
+• Castigos para darle gracia: pagar los cafés, un brindis con discurso, recoger la mesa…
+• Modo práctica para probar el sensor antes de la cena.
+• Sin cuentas, sin anuncios y sin rastreo. Escribe tu nombre y a jugar.
+• En español e inglés.
+
+Menos pantalla y más conversación. Deja el móvil y disfruta de la cena.

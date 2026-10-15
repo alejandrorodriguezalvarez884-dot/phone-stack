@@ -38,7 +38,10 @@ npm install
 npx expo start          # escanea el QR con Expo Go
 npx expo start --web    # vista rápida en el navegador (sin sensor: botones "Simular")
 npx tsc --noEmit && npx expo lint
+npm test                # Jest: códigos de mesa, traducciones, sensor y una ronda de práctica
 ```
+
+Para probar la build nativa en el simulador: `npx expo run:ios` (necesita Xcode y CocoaPods). En el simulador no hay acelerómetro, así que aparecen los botones "Simular".
 
 Los sonidos se generan con `node scripts/generate-sounds.mjs` y los iconos con `node scripts/generate-icons.mjs`.
 
@@ -52,7 +55,11 @@ Los sonidos se generan con `node scripts/generate-sounds.mjs` y los iconos con `
 - `src/useFaceDown.ts`: acelerómetro, detección de boca abajo y de levantamiento
 - `src/useSounds.ts`: alarma, pitido de inicio y vibración
 - `src/i18n.ts`: textos y castigos en español e inglés
-- `docs/privacy.html`: política de privacidad (para GitHub Pages)
+- `plugins/withSceneLifecycle.js`: adopta el ciclo de vida UIScene, sin el que la app se cierra al arrancar en iOS 27
+- `locales/`: textos de Info.plist (permiso de movimiento) en inglés y español
+- `__tests__/`: tests de Jest
+- `docs/`: política de privacidad, soporte y portada (para GitHub Pages) y la guía de publicación
+- `fastlane/`: ficha de App Store (textos y capturas) en inglés y español
 
 ## Pendiente de probar en dispositivos reales
 
@@ -61,6 +68,8 @@ Los sonidos se generan con `node scripts/generate-sounds.mjs` y los iconos con `
 
 ## Publicación
 
-Las builds se compilan en la nube con EAS (`npx eas-cli@latest build`), así que no hace falta un Mac para iOS. El identificador del paquete es `com.alejandrorodriguez.phonestack`.
+Las builds se compilan en la nube con EAS (`npx eas-cli@latest build`, perfiles en `eas.json`), así que no hace falta un Mac para iOS. El identificador del paquete es `com.alejandrorodriguez.phonestack`.
+
+Los pasos para App Store (ficha, capturas, privacidad y lo que falta hacer con la cuenta de Apple) están en [`docs/APP_STORE.md`](docs/APP_STORE.md).
 
 Ideas de monetización: anuncios entre rondas y packs de castigos personalizados de pago (la lista está en `src/i18n.ts`).

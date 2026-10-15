@@ -13,3 +13,12 @@ export const colors = {
   error: '#FF8A80',
   white: '#FFFFFF',
 };
+
+// Upper limits for Dynamic Type (maxFontSizeMultiplier). Body text grows the most; big display text
+// and controls grow less, so the largest accessibility sizes still fit on a phone screen.
+export const maxScale = {
+  display: 1.2,
+  heading: 1.5,
+  control: 1.5,
+  body: 2,
+};
