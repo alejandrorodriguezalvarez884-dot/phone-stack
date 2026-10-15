@@ -27,7 +27,7 @@ Las capturas se sacaron del simulador iPhone 17 (6,3") con cuatro jugadores cone
 - **Subtítulo:** First to grab their phone pays / Quien coja el móvil, paga
 - **Categoría:** Juegos → Casual y Familia (secundaria: Entretenimiento)
 - **Precio:** gratis, sin compras dentro de la app
-- **URLs:** `https://alejandrorodriguezalvarez884-dot.github.io/phone-stack/privacy.html` (privacidad), `.../support.html` (soporte), `.../` (marketing). Funcionan cuando se activa GitHub Pages (paso 2 de abajo).
+- **URLs:** `https://alejandrorodriguezalvarez884-dot.github.io/phone-stack/privacy.html` (privacidad), `.../support.html` (soporte), `.../` (marketing). Las sirve GitHub Pages desde la carpeta `docs/` de `main`.
 
 ## Respuestas para App Store Connect
 
@@ -58,8 +58,8 @@ Las capturas se sacaron del simulador iPhone 17 (6,3") con cuatro jugadores cone
 Hecho:
 
 - App creada en App Store Connect (id 6823333935, bundle `com.alejandrorodriguez.phonestack`, equipo J44H9U6HLW) con la ficha en inglés y español, capturas, privacidad, clasificación por edades, precio gratis y disponibilidad en 175 países (no en Mac ni Vision Pro).
-- Build 1.0.0 (1) subida desde este Mac.
-- GitHub Pages publica `docs/` desde la rama `app-store-release`. **Al fusionar el PR**, cámbialo a `main` en *Settings → Pages* (o con `gh api -X PUT repos/alejandrorodriguezalvarez884-dot/phone-stack/pages -f "source[branch]=main" -f "source[path]=/docs"`).
+- Build 1.0.0 (1) subida desde este Mac y enviada a revisión el 15/10/2026, con publicación automática tras la aprobación.
+- GitHub Pages publica `docs/` desde `main`.
 
 Pendiente:
 
