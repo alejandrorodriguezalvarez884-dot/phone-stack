@@ -1,0 +1,7 @@
+Phone Stack is a party game for dinners. No account or login is needed: type any name on the first screen.
+
+To test with a single device, tap "Practice solo", then "Start round". Put the phone face down on a table; after a short beep the round is armed. Pick the phone up and the alarm sounds with your name and a penalty. On a device without an accelerometer, "Simulate face down" / "Simulate pick up" buttons appear instead.
+
+To test the multiplayer mode you need two devices: on the first tap "Create table" and note the 4-character code; on the second type the same code and tap "Join". The first device (host) taps "Start round", both phones go face down, and the first one to be picked up sets off the alarm on both.
+
+The accelerometer is only read while the user is at a table. Names and the face-down state are synced through Firebase Realtime Database and removed when the player leaves the table. The app contains no ads, purchases, analytics or tracking.

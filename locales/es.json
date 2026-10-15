@@ -1,0 +1,6 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "Phone Stack",
+    "NSMotionUsageDescription": "Phone Stack usa los sensores de movimiento para saber cuándo levantas el móvil de la mesa."
+  }
+}
