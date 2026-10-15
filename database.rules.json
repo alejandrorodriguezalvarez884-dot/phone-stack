@@ -1,0 +1,30 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$code": {
+        ".read": "$code.matches(/^[A-Z0-9]{4}$/)",
+        ".write": "$code.matches(/^[A-Z0-9]{4}$/)",
+        "players": {
+          "$player": {
+            ".validate": "newData.hasChildren(['name', 'ready', 'joinedAt']) && $player.length <= 40",
+            "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20" },
+            "ready": { ".validate": "newData.isBoolean()" },
+            "joinedAt": { ".validate": "newData.isNumber()" },
+            "$other": { ".validate": false }
+          }
+        },
+        "state": {
+          ".validate": "newData.hasChildren(['phase', 'round']) && newData.child('round').isNumber()"
+        },
+        "lifts": {
+          "$round": {
+            ".validate": "!data.exists() && newData.hasChildren(['playerId', 'name'])"
+          }
+        },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}

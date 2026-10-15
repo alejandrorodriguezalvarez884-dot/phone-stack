@@ -16,14 +16,26 @@ import { useFaceDown } from './useFaceDown';
 
 export type Identity = { id: string; name: string };
 
-type Lift = { round: number; playerId: string; name: string };
+// confirmed: came back from the table (the database keeps only the first lift of each round).
+// Unconfirmed lifts are our own, shown right away so the alarm does not wait for the network.
+type Lift = { round: number; playerId: string; name: string; confirmed: boolean };
 
 const INITIAL_STATE: GameState = { phase: 'lobby', round: 0, tally: {} };
 
 // The host (whoever joined the table first) is the referee: it starts rounds, arms them when every
-// phone is face down and decides who lifted first. Everyone else mirrors the host's state, so all
-// phones agree on the loser even if two people grab their phones at almost the same time.
-export function useGame({ code, identity, practice }: { code: string; identity: Identity; practice: boolean }) {
+// phone is face down and turns the first confirmed lift into the result. Everyone else mirrors the
+// host's state, so all phones agree on the loser even if two people grab their phones at once.
+export function useGame({
+  code,
+  identity,
+  practice,
+  create,
+}: {
+  code: string;
+  identity: Identity;
+  practice: boolean;
+  create: boolean;
+}) {
   const [joinedAt] = useState(() => Date.now());
   const [players, setPlayers] = useState<Player[]>([]);
   const [status, setStatus] = useState<ConnectionStatus>('connecting');
@@ -45,17 +57,19 @@ export function useGame({ code, identity, practice }: { code: string; identity: 
         if (message.type === 'state') {
           setState((prev) => (message.state.round < prev.round ? prev : message.state));
         } else {
-          setFirstLift((prev) => (prev && prev.round === message.round ? prev : message));
+          setFirstLift((prev) =>
+            prev?.confirmed && prev.round === message.round ? prev : { ...message, confirmed: true },
+          );
         }
       },
     };
-    const opened = practice ? openLocalRoom(me, handlers) : openRoom(code, me, handlers);
+    const opened = practice ? openLocalRoom(me, handlers) : openRoom(code, me, handlers, create);
     room.current = opened;
     return () => {
       opened.close();
       room.current = null;
     };
-  }, [code, practice, me]);
+  }, [code, practice, create, me]);
 
   const sorted = useMemo(
     () => [...players].sort((a, b) => a.joinedAt - b.joinedAt || a.id.localeCompare(b.id)),
@@ -73,8 +87,8 @@ export function useGame({ code, identity, practice }: { code: string; identity: 
   // --- Sensor ---
   const armed = state.phase === 'armed';
   const reportLift = useCallback(() => {
-    const lift: Lift = { round: state.round, playerId: identity.id, name: identity.name };
-    setFirstLift((prev) => (prev && prev.round === lift.round ? prev : lift));
+    const lift = { round: state.round, playerId: identity.id, name: identity.name };
+    setFirstLift((prev) => (prev && prev.round === lift.round ? prev : { ...lift, confirmed: false }));
     room.current?.send({ type: 'lift', ...lift });
   }, [state.round, identity.id, identity.name]);
 
@@ -99,17 +113,6 @@ export function useGame({ code, identity, practice }: { code: string; identity: 
   }, [armed, reportLift]);
 
   // --- Host duties ---
-  const playerIds = sorted.map((p) => p.id).join(',');
-  const stateRef = useRef(state);
-  useEffect(() => {
-    stateRef.current = state;
-  });
-
-  // Bring newcomers (and a new host's followers) up to date.
-  useEffect(() => {
-    if (isHost && !practice) room.current?.send({ type: 'state', state: stateRef.current });
-  }, [isHost, practice, playerIds]);
-
   // Arm the round once every phone at the table is face down.
   useEffect(() => {
     if (!isHost || state.phase !== 'placing') return;
@@ -119,18 +122,15 @@ export function useGame({ code, identity, practice }: { code: string; identity: 
     publish({ ...state, phase: 'armed', roster: players.map(({ id, name }) => ({ id, name })) });
   }, [isHost, state, players, minPlayers, publish]);
 
-  // Pick the loser: first lift message, or anyone from the armed roster whose phone stops being
-  // face down or who drops off the table (in case their lift message never arrived).
+  // Pick the loser: the first confirmed lift, or anyone from the armed roster who drops off the
+  // table mid-round (app killed, connection lost).
   useEffect(() => {
     if (!isHost || state.phase !== 'armed') return;
     let loser: { id: string; name: string } | undefined;
-    if (firstLift && firstLift.round === state.round) {
+    if (firstLift?.confirmed && firstLift.round === state.round) {
       loser = { id: firstLift.playerId, name: firstLift.name };
     } else {
-      loser = state.roster?.find((r) => {
-        const p = players.find((x) => x.id === r.id);
-        return !p || !p.ready;
-      });
+      loser = state.roster?.find((r) => !players.some((p) => p.id === r.id));
     }
     if (!loser) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect

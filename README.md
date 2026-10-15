@@ -7,23 +7,29 @@ App móvil (iOS y Android) para el juego de las cenas: todos ponen el móvil boc
 1. Uno crea la mesa (código de 4 caracteres) y los demás se unen con el código.
 2. El anfitrión pulsa **Empezar ronda** y todos ponen el móvil boca abajo.
 3. Cuando todos los móviles están boca abajo y quietos, la ronda se arma (pitido corto).
-4. El primero que inclina su móvil más de 25° (o sale de la app, o se desconecta) hace sonar la alarma en todos. El anfitrión decide quién ha sido, sortea un castigo y suma una al marcador.
+4. El primero que inclina su móvil más de 25° (o sale de la app, o se desconecta) hace sonar la alarma en todos. La base de datos se queda solo con el primero que levanta el móvil en cada ronda, y el anfitrión lo anuncia, sortea un castigo y suma una al marcador.
 
 El anfitrión es quien entró primero en la mesa; si se va, el siguiente toma el relevo con el estado y el marcador.
 
 También hay un **modo práctica** para una sola persona que no necesita servidor.
 
-## Sincronización (Supabase Realtime)
+## Sincronización (Firebase Realtime Database)
 
-Las mesas usan [Supabase Realtime](https://supabase.com/docs/guides/realtime): *presence* para saber quién está y quién tiene el móvil boca abajo, y *broadcast* para los mensajes del juego. No hay tablas ni base de datos.
+Las mesas viven en Firebase Realtime Database, proyecto `phone-stack-omtr` (región `europe-west1`), en `rooms/{CÓDIGO}`:
 
-1. Crea un proyecto gratuito en [supabase.com](https://supabase.com).
-2. En **Project Settings → API Keys** copia la URL del proyecto y la clave *publishable* (o *anon*). Nunca la *secret* / *service_role*.
-3. En **Realtime → Settings**, deja activado el acceso público a los canales (viene así por defecto).
-4. `cp .env.example .env.local` y rellena `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_KEY`.
-5. Para las builds de EAS, crea esas dos variables también en EAS (`npx eas-cli@latest env:create`), porque se incrustan en la app al compilar.
+- `players/{id}`: nombre, si el móvil está boca abajo y hora de entrada (de servidor). Se borra solo al desconectarse.
+- `state`: fase, ronda, perdedor, castigo y marcador. Solo lo escribe el anfitrión.
+- `lifts/{ronda}`: el primero que levantó el móvil en esa ronda. Las reglas no dejan sobrescribirlo.
 
-Sin estas variables la app funciona, pero solo deja practicar.
+La configuración web está en `src/config.ts` (no es secreta: el acceso lo controlan las reglas). Las reglas están en `database.rules.json`; para desplegarlas:
+
+```bash
+npx firebase-tools@latest deploy --only database
+```
+
+Las mesas abandonadas se quedan en la base de datos (son unos pocos bytes); quien crea una mesa nueva borra lo que hubiera con ese código.
+
+Con el plan gratuito (Spark) caben 100 conexiones simultáneas, unas 25 mesas de 4 a la vez. Para más, pasa el proyecto a Blaze (pago por uso).
 
 ## Desarrollo
 
@@ -42,7 +48,7 @@ Los sonidos se generan con `node scripts/generate-sounds.mjs` y los iconos con `
 - `src/components/HomeScreen.tsx`: nombre, crear/unirse a mesa, práctica
 - `src/components/RoomScreen.tsx`: la mesa (fases, alarma, marcador)
 - `src/useGame.ts`: estado del juego y lógica del anfitrión
-- `src/room.ts`: canal de Supabase (presence + broadcast) y mesa local para practicar
+- `src/room.ts`: mesa en Firebase y mesa local para practicar
 - `src/useFaceDown.ts`: acelerómetro, detección de boca abajo y de levantamiento
 - `src/useSounds.ts`: alarma, pitido de inicio y vibración
 - `src/i18n.ts`: textos y castigos en español e inglés

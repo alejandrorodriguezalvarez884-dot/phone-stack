@@ -9,7 +9,7 @@ import { Button, Card, Logo } from './ui';
 
 type Props = {
   initialName: string;
-  onEnter: (table: { code: string; practice: boolean; name: string }) => void;
+  onEnter: (table: { code: string; practice: boolean; create: boolean; name: string }) => void;
 };
 
 const MAX_NAME = 20;
@@ -47,7 +47,7 @@ export function HomeScreen({ initialName, onEnter }: Props) {
               <Button
                 label={t.createTable}
                 disabled={!canPlay}
-                onPress={() => onEnter({ code: randomCode(), practice: false, name: trimmed })}
+                onPress={() => onEnter({ code: randomCode(), practice: false, create: true, name: trimmed })}
               />
               <View style={styles.joinRow}>
                 <TextInput
@@ -64,7 +64,7 @@ export function HomeScreen({ initialName, onEnter }: Props) {
                   label={t.joinTable}
                   variant="secondary"
                   disabled={!canPlay || code.length !== CODE_LENGTH}
-                  onPress={() => onEnter({ code, practice: false, name: trimmed })}
+                  onPress={() => onEnter({ code, practice: false, create: false, name: trimmed })}
                   style={styles.joinButton}
                 />
               </View>
@@ -77,7 +77,7 @@ export function HomeScreen({ initialName, onEnter }: Props) {
             label={t.practice}
             variant="secondary"
             disabled={!canPlay}
-            onPress={() => onEnter({ code: '', practice: true, name: trimmed })}
+            onPress={() => onEnter({ code: '', practice: true, create: false, name: trimmed })}
           />
         </Card>
 

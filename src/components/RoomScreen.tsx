@@ -13,6 +13,8 @@ import { Button, Card, tap } from './ui';
 type Props = {
   code: string;
   practice: boolean;
+  // This phone opened the table (clears leftovers from an old table with the same code).
+  create: boolean;
   identity: Identity;
   onLeave: () => void;
 };
@@ -22,7 +24,7 @@ type Props = {
 const ALARM_MAX_MS = 10_000;
 const KEEP_AWAKE_TAG = 'phone-stack-room';
 
-export function RoomScreen({ code, practice, identity, onLeave }: Props) {
+export function RoomScreen({ code, practice, create, identity, onLeave }: Props) {
   // Screen stays on at the table, otherwise the phone sleeps face down and stops reading the sensor.
   useEffect(() => {
     activateKeepAwakeAsync(KEEP_AWAKE_TAG).catch(() => {});
@@ -30,7 +32,7 @@ export function RoomScreen({ code, practice, identity, onLeave }: Props) {
       deactivateKeepAwake(KEEP_AWAKE_TAG).catch(() => {});
     };
   }, []);
-  const game = useGame({ code, identity, practice });
+  const game = useGame({ code, identity, practice, create });
   const { state, sensor } = game;
 
   // Ring from the first lift until silenced, the next round, or the timeout.

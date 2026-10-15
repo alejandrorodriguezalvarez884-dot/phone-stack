@@ -1,10 +1,26 @@
-import 'react-native-url-polyfill/auto';
-import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js';
+import { getApps, initializeApp } from 'firebase/app';
+import {
+  getDatabase,
+  onChildAdded,
+  onChildChanged,
+  onDisconnect,
+  onValue,
+  ref,
+  remove,
+  runTransaction,
+  serverTimestamp,
+  set,
+  update,
+  type Database,
+} from 'firebase/database';
 
-import { SUPABASE_KEY, SUPABASE_URL } from './config';
+import { firebaseConfig } from './config';
 
-// One table = one Supabase Realtime channel. Presence lists who is sitting at the table (and whose
-// phone is face down); broadcast carries the game messages. No database tables are involved.
+// One table = one node in Firebase Realtime Database, rooms/{CODE}:
+//   players/{id}  who is sitting at the table and whose phone is face down (removed on disconnect)
+//   state         the game state, written only by the host
+//   lifts/{round} the first pick-up of each round; a transaction plus the database rules make sure
+//                 only the first one sticks, so every phone sees the same loser
 
 export type Player = {
   id: string;
@@ -62,58 +78,89 @@ export function normalizeCode(input: string) {
   return input.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, CODE_LENGTH);
 }
 
-let client: SupabaseClient | null = null;
+let db: Database | null = null;
 
-function getClient() {
-  client ??= createClient(SUPABASE_URL, SUPABASE_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-  });
-  return client;
+function getDb() {
+  db ??= getDatabase(getApps()[0] ?? initializeApp(firebaseConfig));
+  return db;
 }
 
-export function openRoom(code: string, me: Player, handlers: RoomHandlers): Room {
-  const channel: RealtimeChannel = getClient().channel(`phone-stack:${code}`, {
-    config: { broadcast: { self: false }, presence: { key: me.id } },
-  });
+// Firebase drops empty objects and rejects undefined values, so normalize both ways.
+function toDb<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function fromDb(value: Partial<GameState>): GameState {
+  return { phase: 'lobby', round: 0, ...value, tally: value.tally ?? {} };
+}
+
+// create: this phone is opening a new table, so clear anything left over from an old table that
+// happened to use the same code.
+export function openRoom(code: string, me: Player, handlers: RoomHandlers, create: boolean): Room {
+  const database = getDb();
+  const roomRef = ref(database, `rooms/${code}`);
+  const meRef = ref(database, `rooms/${code}/players/${me.id}`);
   let current = me;
-  let joined = false;
+  let connected = false;
   let closed = false;
+  const unsubscribers: (() => void)[] = [];
 
-  channel.on('presence', { event: 'sync' }, () => {
-    const state = channel.presenceState<Player>();
-    // A player has one entry per connection; keep the newest.
-    const players = Object.values(state)
-      .map((entries) => entries[entries.length - 1])
-      .filter((p): p is Player & { presence_ref: string } => !!p)
-      .map(({ id, name, joinedAt, ready }) => ({ id, name, joinedAt, ready }));
-    handlers.onPlayers(players);
-  });
+  // (Re)announce ourselves every time the connection comes up, and leave automatically when it drops.
+  const join = async () => {
+    await onDisconnect(meRef).remove();
+    await set(meRef, { name: current.name, ready: current.ready, joinedAt: serverTimestamp() });
+  };
 
-  channel.on('broadcast', { event: 'msg' }, ({ payload }) => handlers.onMessage(payload as RoomMessage));
-
-  channel.subscribe((status) => {
+  const start = async () => {
+    if (create) await remove(roomRef);
     if (closed) return;
-    if (status === 'SUBSCRIBED') {
-      joined = true;
-      handlers.onStatus('connected');
-      channel.track(current);
-    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-      joined = false;
-      handlers.onStatus('error');
-    }
-  });
+
+    unsubscribers.push(
+      onValue(ref(database, '.info/connected'), (snap) => {
+        connected = snap.val() === true;
+        handlers.onStatus(connected ? 'connected' : 'connecting');
+        if (connected) join().catch(() => handlers.onStatus('error'));
+      }),
+      onValue(ref(database, `rooms/${code}/players`), (snap) => {
+        const raw = (snap.val() ?? {}) as Record<string, Omit<Player, 'id'>>;
+        handlers.onPlayers(
+          Object.entries(raw).map(([id, p]) => ({ id, name: p.name, ready: p.ready, joinedAt: p.joinedAt })),
+        );
+      }),
+      onValue(ref(database, `rooms/${code}/state`), (snap) => {
+        if (snap.exists()) handlers.onMessage({ type: 'state', state: fromDb(snap.val()) });
+      }),
+    );
+    const onLift = (snap: { key: string | null; val: () => { playerId: string; name: string } }) => {
+      const { playerId, name } = snap.val();
+      handlers.onMessage({ type: 'lift', round: Number(snap.key), playerId, name });
+    };
+    const liftsRef = ref(database, `rooms/${code}/lifts`);
+    unsubscribers.push(onChildAdded(liftsRef, onLift), onChildChanged(liftsRef, onLift));
+  };
+
+  start().catch(() => handlers.onStatus('error'));
 
   return {
     update(next) {
       current = next;
-      if (joined) channel.track(next);
+      if (connected) update(meRef, { name: next.name, ready: next.ready }).catch(() => {});
     },
     send(message) {
-      if (joined) channel.send({ type: 'broadcast', event: 'msg', payload: message });
+      if (message.type === 'state') {
+        set(ref(database, `rooms/${code}/state`), toDb(message.state)).catch(() => {});
+      } else {
+        const { round, playerId, name } = message;
+        runTransaction(ref(database, `rooms/${code}/lifts/${round}`), (existing) => existing ?? { playerId, name }).catch(
+          () => {},
+        );
+      }
     },
     close() {
       closed = true;
-      getClient().removeChannel(channel);
+      unsubscribers.forEach((off) => off());
+      onDisconnect(meRef).cancel().catch(() => {});
+      remove(meRef).catch(() => {});
     },
   };
 }
@@ -130,7 +177,10 @@ export function openLocalRoom(me: Player, handlers: RoomHandlers): Room {
       current = next;
       handlers.onPlayers([next]);
     },
-    send: () => {},
+    // Lifts come straight back, as the database would confirm them.
+    send(message) {
+      if (message.type === 'lift') setTimeout(() => handlers.onMessage(message), 0);
+    },
     close: () => {},
   };
 }

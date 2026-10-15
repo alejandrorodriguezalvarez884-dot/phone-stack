@@ -10,7 +10,7 @@ import { loadIdentity, saveIdentity } from './src/identity';
 import { colors } from './src/theme';
 import type { Identity } from './src/useGame';
 
-type Table = { code: string; practice: boolean };
+type Table = { code: string; practice: boolean; create: boolean };
 
 export default function App() {
   const [identity, setIdentity] = useState<Identity | null>(null);
@@ -29,15 +29,21 @@ export default function App() {
       <SafeAreaView style={styles.safe}>
         {identity &&
           (table ? (
-            <RoomScreen code={table.code} practice={table.practice} identity={identity} onLeave={leave} />
+            <RoomScreen
+              code={table.code}
+              practice={table.practice}
+              create={table.create}
+              identity={identity}
+              onLeave={leave}
+            />
           ) : (
             <HomeScreen
               initialName={identity.name}
-              onEnter={({ code, practice, name }) => {
+              onEnter={({ code, practice, create, name }) => {
                 const next = { ...identity, name };
                 setIdentity(next);
                 saveIdentity(next);
-                setTable({ code, practice });
+                setTable({ code, practice, create });
               }}
             />
           ))}
