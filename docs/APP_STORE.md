@@ -23,9 +23,9 @@ Las capturas se sacaron del simulador iPhone 17 (6,3") con cuatro jugadores cone
 
 ## Ficha
 
-- **Nombre:** Phone Stack
+- **Nombre en la tienda:** Phone Stack: Dinner Game / Phone Stack: juego de cenas ("Phone Stack" a secas ya lo usa otra app). Bajo el icono se sigue viendo "Phone Stack".
 - **Subtítulo:** First to grab their phone pays / Quien coja el móvil, paga
-- **Categoría:** Juegos → Fiesta (secundaria: Entretenimiento)
+- **Categoría:** Juegos → Casual y Familia (secundaria: Entretenimiento)
 - **Precio:** gratis, sin compras dentro de la app
 - **URLs:** `https://alejandrorodriguezalvarez884-dot.github.io/phone-stack/privacy.html` (privacidad), `.../support.html` (soporte), `.../` (marketing). Funcionan cuando se activa GitHub Pages (paso 2 de abajo).
 
@@ -34,8 +34,8 @@ Las capturas se sacaron del simulador iPhone 17 (6,3") con cuatro jugadores cone
 **Privacidad de la app (App Privacy):**
 
 - ¿Recoges datos? Sí.
-- *Contact Info → Name* (el nombre que escribe el jugador): uso **App Functionality**, **no** vinculado a la identidad, **no** se usa para rastreo.
-- *Identifiers → User ID* (identificador aleatorio de la instalación): uso **App Functionality**, **no** vinculado, **no** rastreo.
+- *Contact Info → Name* (el nombre que escribe el jugador): uso **App Functionality**, **vinculado** a la identidad (un nombre identifica por sí mismo), **no** se usa para rastreo.
+- *Identifiers → User ID* (identificador aleatorio de la instalación): uso **App Functionality**, **vinculado** (va junto al nombre), **no** rastreo.
 - Nada más: sin ubicación, sin contactos, sin analítica, sin anuncios. Es lo mismo que declara el privacy manifest.
 
 **Clasificación por edades:** todo "No/Ninguno" salvo, para ir sobre seguro, *Referencias al alcohol: poco frecuentes/leves* (castigos como "invita a la siguiente ronda" o "brinda con un discurso"). Si el formulario pregunta por contenido generado por usuarios: los jugadores solo ven el nombre que escriben los demás en su misma mesa (con código privado).
