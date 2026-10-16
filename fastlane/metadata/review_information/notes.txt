@@ -1,7 +1,25 @@
-Phone Stack is a party game for dinners. No account or login is needed: type any name on the first screen.
+SCREEN RECORDING (physical iPhone, latest iOS): <PASTE VIDEO LINK HERE>
 
-To test with a single device, tap "Practice solo", then "Start round". Put the phone face down on a table; after a short beep the round is armed. Pick the phone up and the alarm sounds with your name and a penalty. On a device without an accelerometer, "Simulate face down" / "Simulate pick up" buttons appear instead.
+1. PURPOSE AND AUDIENCE
+Phone Stack is a party game for groups of adult friends and families at dinners. It turns the classic "phone stack" game into an app: everyone puts their phone face down on the table and the first person to pick theirs up loses the round (and, by tradition, pays or does a light-hearted penalty). The problem it solves is phones interrupting conversation at shared meals; the value is a fun, self-enforcing reason to leave them alone. The app is free, with no ads, purchases, accounts, analytics or tracking.
 
-To test the multiplayer mode you need two devices: on the first tap "Create table" and note the 4-character code; on the second type the same code and tap "Join". The first device (host) taps "Start round", both phones go face down, and the first one to be picked up sets off the alarm on both.
+2. HOW TO TEST
+No account or login is needed: type any name on the first screen. There are no demo credentials and no sample files.
+- Single device: tap "Practice solo", then "Start round". Put the phone face down on a table; after a short beep the round is armed. Pick the phone up and the alarm sounds with your name and a random penalty.
+- Multiplayer (two or more devices): on the first device tap "Create table" and note the 4-character code; on the second, type the same code and tap "Join". The first device (host) taps "Start round", all phones go face down, and the first one to be picked up (or to leave the app) sets off the alarm on every phone. The scoreboard counts the rounds each player has lost.
+On a device without an accelerometer, "Simulate face down" / "Simulate pick up" buttons appear instead.
 
-The accelerometer is only read while the user is at a table. Names and the face-down state are synced through Firebase Realtime Database and removed when the player leaves the table. The app contains no ads, purchases, analytics or tracking.
+3. EXTERNAL SERVICES
+- Firebase Realtime Database (Google): syncs each table in real time (player names, face-down state, round state and scoreboard). Data is removed when a player leaves the table.
+No authentication service, payment processor, AI service, ad network or analytics SDK is used. Sounds and icons were created by the developer.
+
+4. REGIONAL DIFFERENCES
+None. The app works the same in every region where it is available. The interface and penalties are shown in English or Spanish depending on the device language (English for any other language).
+
+5. REGULATED INDUSTRY / THIRD-PARTY MATERIAL
+Not applicable. The app does not operate in a regulated industry and contains no protected third-party material.
+
+USER-GENERATED CONTENT
+The only user-entered content is the display name each player types. It is shown only to the people at the same private table (joined with a 4-character code shared in person) and deleted when the player leaves. There is no chat, no public content, no profiles and no media sharing.
+
+The accelerometer is only read while the user is at a table.

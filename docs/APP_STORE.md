@@ -61,8 +61,11 @@ Hecho:
 - Build 1.0.0 (1) subida desde este Mac y enviada a revisión el 15/10/2026, con publicación automática tras la aprobación.
 - GitHub Pages publica `docs/` desde `main`.
 
+16/10/2026: App Review respondió con *Guideline 2.1 - Information Needed* (cuenta con poco historial). Piden un vídeo en un iPhone real con el último iOS, más propósito, instrucciones, servicios externos, diferencias regionales y regulación. La respuesta (en inglés) está en `fastlane/metadata/review_information/notes.txt`: se pega en la respuesta del Resolution Center **y** en *App Review Information → Notes*, con el enlace al vídeo.
+
 Pendiente:
 
+- **Grabar el vídeo** en un iPhone real (instala la build 1.0.0 (1) por TestFlight, testers internos, sin revisión) y responder en App Store Connect.
 - **Probar en un iPhone real** el signo del eje Z y los umbrales del sensor (ver README → "Pendiente de probar en dispositivos reales"). El simulador no tiene acelerómetro.
 
 ## Cómo se firmó y subió (para la próxima versión)
